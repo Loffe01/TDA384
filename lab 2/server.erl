@@ -4,12 +4,20 @@
 % Start a new server process with the given name
 % Do not change the signature of this function.
 start(ServerAtom) ->
+    Spawn(server, reply_all )
+
+reply_all() ->
+    recive (ServerAtom)
+
+    reply_all().
     
+
+
     % TODO Implement function
     % - Spawn a new process which waits for a message, handles it, then loops infinitely
     % - Register this process to ServerAtom
     % - Return the process ID
-    not_implemented.
+
 
 % Stop the server process registered to the given name,
 % together with any other associated processes
