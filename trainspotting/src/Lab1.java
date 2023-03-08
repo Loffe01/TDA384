@@ -3,16 +3,15 @@ import java.util.concurrent.Semaphore;
 import TSim.*;
 
 public class Lab1 {
-
   private List<Rail> railsection = new ArrayList<>();
   Lab1.Rail onewayright = new Rail("onewayright");
   Lab1.Rail onewayleft = new Rail("onewayleft");
   Lab1.Rail intersection = new Rail("intersection");
   Lab1.Rail twotop = new Rail("twotop");
   Lab1.Rail twobot = new Rail("twobot");
-  Lab1.Rail onetop = new Rail("twotop");
-  Lab1.Rail onebot = new Rail("twobot");
-  Lab1.Rail railstopbot = new Rail("railstopbot");
+  Lab1.Rail onetop = new Rail("onetop");
+  Lab1.Rail onebot = new Rail("onebot");
+  Lab1.Rail railstoptop = new Rail("railstoptop");
 
   public Lab1() {
 
@@ -28,22 +27,20 @@ public class Lab1 {
     railsection.add(onebot);
     onewayright.add(18, 7);
     onewayright.add(18, 9);
+    onewayright.add(16, 9);
     onewayleft.add(1, 10);
     onewayleft.add(2, 11);
     onewayleft.add(3, 9);
     intersection.add(6, 6);
-    intersection.add(10, 7);
     intersection.add(9, 5);
-    intersection.add(10, 8);
-    twotop.add(13, 9);
+    twotop.add(12, 9);
     twotop.add(6, 9);
     twobot.add(6, 10);
-    twobot.add(13, 10);
-    onetop.add(16, 8);
-    onetop.add(16, 7);
-    onebot.add(9, 7);
-    onebot.add(9, 8);
-
+    twobot.add(12, 10);
+    onetop.add(10, 7);
+    onetop.add(15, 7);
+    onebot.add(15, 8);
+    onebot.add(10, 8);
   }
 
   public Rail findRail(int x, int y) {
@@ -129,12 +126,14 @@ public class Lab1 {
     private int trainID;
     private int Speed;
     private boolean up;
+    private boolean top;
     private TSimInterface tsi = TSimInterface.getInstance();
 
-    public Train(int trainID, int Speed, boolean up) {
+    public Train(int trainID, int Speed, boolean up, boolean top) {
       this.trainID = trainID;
       this.Speed = Speed;
       this.up = up;
+      this.top = top;
     }
 
     @Override
@@ -153,119 +152,187 @@ public class Lab1 {
           if (currentsensor.getStatus() == 0x01) {
             // System.out.print(currentsensor);
             if (currentrail == null) {
-              System.out.println("rail is null");
+
             } else {
-              System.out.println(currentrail.string);
+              System.out.println(currentrail.string + " " + x + " and " + y);
             }
 
+            // Null handeler, handels cases when the rail is not on a track connected to a
+            // semaphore
             if (currentrail == null) {
 
-              // Dvs sensorer som inte är kopplade till semaforer/rails
-              if (x == 14 && y > 10 && this.up == false) {
-                tsi.setSpeed(trainID, 0);
-                Thread.sleep(1000 + (20 * Speed));
-                Speed = -Speed;
-                tsi.setSpeed(trainID, Speed);
-                this.up = true;
+              if (x == 14 && y == 3) {
+                if (this.up == false) {
+                  onetop.acquire();
+                  System.out.println("ONETOP ACQUIRED IN START");
+                  continue;
+                } else {
+                  tsi.setSpeed(trainID, 0);
+                  Thread.sleep(1000 + (20 * Speed));
+                  Speed = -Speed;
+                  tsi.setSpeed(trainID, Speed);
+                  this.up = false;
+                  continue;
+                }
+              }
+              if (x == 14 && y == 5) {
+                System.out.println("PASSERAT Y == 5");
+                if (this.up == false) {
+                  onebot.acquire();
+                  System.out.println("ONEBOT ACQUIRED IN START");
+                  continue;
+                } else {
+                  tsi.setSpeed(trainID, 0);
+                  Thread.sleep(1000 + (20 * Speed));
+                  Speed = -Speed;
+                  tsi.setSpeed(trainID, Speed);
+                  this.up = false;
+                  continue;
+
+                }
               }
 
-              if (x == 14 && y < 10 && this.up == true) {
-                tsi.setSpeed(trainID, 0);
-                Thread.sleep(1000 + (20 * Speed));
-                Speed = -Speed;
-                tsi.setSpeed(trainID, Speed);
-                this.up = false;
-
-              }
-              if ((x == 6 && y == 11 && this.up == true)) {
-                tsi.setSpeed(trainID, 0);
-                onewayleft.acquire();
-                tsi.setSpeed(trainID, Speed);
-                tsi.setSwitch(3, 11, 1);
-                railstopbot.release();
-              }
-              if (x == 6 && y == 13 && this.up == true) {
-
-                tsi.setSpeed(trainID, 0);
-                onewayleft.acquire();
-                tsi.setSpeed(trainID, Speed);
-                tsi.setSwitch(3, 11, 0);
-
+              if (x == 14 && y == 11) {
+                if (this.up == false) {
+                  tsi.setSpeed(trainID, 0);
+                  Thread.sleep(1000 + (20 * Speed));
+                  Speed = -Speed;
+                  tsi.setSpeed(trainID, Speed);
+                  this.up = true;
+                } else {
+                  railstoptop.acquire();
+                  System.out.println("railstopbot.acquired!");
+                  continue;
+                }
               }
 
-              if (x == 16 && y == 9 && this.up == true) {
+              if (x == 14 && y == 13) {
+                if (this.up == false) {
+                  tsi.setSpeed(trainID, 0);
+                  Thread.sleep(1000 + (20 * Speed));
+                  Speed = -Speed;
+                  tsi.setSpeed(trainID, Speed);
+                  this.up = true;
+                } else
+                  continue;
 
-                twobot.release();
-                twotop.release();
+                if (this.up == true) {
+                  if (x == 14 && y < 10) {
+                    tsi.setSpeed(trainID, 0);
+                    Thread.sleep(1000 + (20 * Speed));
+                    Speed = -Speed;
+                    tsi.setSpeed(trainID, Speed);
+                    this.up = false;
+
+                  }
+                }
+              }
+              if (x == 6 && y == 11) {
+                if (this.up == true) {
+                  tsi.setSpeed(trainID, 0);
+                  onewayleft.acquire();
+                  tsi.setSpeed(trainID, Speed);
+                  tsi.setSwitch(3, 11, 1);
+                  railstoptop.release();
+                  System.out.println("RAILSTOP REALSED_____________________");
+                  continue;
+                } else {
+                  onewayleft.release();
+                  continue;
+                }
+              }
+              if (x == 6 && y == 13) {
+                if (this.up == true) {
+                  tsi.setSpeed(trainID, 0);
+                  System.out.println("KAN EJ FÅ");
+                  onewayleft.acquire();
+                  System.out.println("KAN FÅ");
+                  tsi.setSpeed(trainID, Speed);
+                  tsi.setSwitch(3, 11, 0);
+                  continue;
+                } else {
+                  onewayleft.release();
+                  continue;
+                }
 
               }
 
-              continue;
-            }
-            if ((x == 6 && y == 6 && this.up == false) ||
-                (x == 9 && y == 5 && this.up == false)) {
-              tsi.setSpeed(trainID, 0);
-              System.out.println("fick10");
-              intersection.acquire();
-              tsi.setSpeed(trainID, Speed);
-
-            }
-            if (currentrail.equals(intersection)) {
               if (this.up == false) {
                 if (x == 10 && y == 7) {
                   intersection.release();
-                  System.out.println("fick1");
-                  onetop.acquire();
+
                 }
                 if (x == 10 && y == 8) {
                   intersection.release();
-                  System.out.println("fick2");
-                  onetop.acquire();
+                } else {
+                  continue;
                 }
+              }
+
+              if ((x == 6 && y == 6 && this.up == false) ||
+                  (x == 9 && y == 5 && this.up == false)) {
+                tsi.setSpeed(trainID, 0);
+                intersection.acquire();
+
+                tsi.setSpeed(trainID, Speed);
+
               } else {
-                if ((x == 10 && y == 7) && (x == 10 && y == 8)) {
-                  onebot.release();
-                  onetop.release();
-                }
+                continue;
+              }
+
+            }
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            if (currentrail.equals(intersection)) {
+              if (this.up == true) {
 
                 if (x == 6 && y == 6) {
                   intersection.release();
-                  System.out.println("fick3");
+
                 }
 
                 if (x == 9 && y == 5) {
                   intersection.release();
-                  System.out.println("fick4");
+
                 }
 
               }
 
             }
-            // System.out.print(currentrail + "cringe");
 
             if (currentrail.equals(onewayleft)) {
-
-              if (this.up == true) {
-                if (twotop.tryAcquire() && x == 1 && y == 9) {
-                  tsi.setSwitch(4, 9, 0);
-
-                }
-                if (twobot.tryAcquire() && x == 1 && y == 10) {
+              if (x == 1 && y == 10 && this.up == true) {
+                if (twobot.tryAcquire()) {
                   tsi.setSwitch(4, 9, 1);
+                } else {
+                  twotop.acquire();
+                  this.top = true;
+                  tsi.setSwitch(4, 9, 0);
+                }
 
-                }
-              } else {
-                if (x == 3 && y == 9) {
-                  twobot.release();
+              } else if (x == 1 && y == 10) {
+                if (this.top == true) {
                   twotop.release();
-                }
-                if (x == 2 && y == 11 && railstopbot.tryAcquire()) {
+                } else
+                  twobot.release();
+              }
+
+              if (x == 2 && this.up == false) {
+                if (railstoptop.tryAcquire()) {
+                  System.out.println("RAILSTOPBOT ACQUIRED FOR THE FIRST TIME IN FORVERER");
                   tsi.setSwitch(3, 11, 1);
+                  this.top = true;
                 } else {
                   tsi.setSwitch(3, 11, 0);
                 }
+                onewayleft.release();
+                continue;
+              }
+              if (x == 3 && this.up == true) {
+                onewayleft.release();
+                continue;
 
               }
+
             }
 
             if (currentrail.equals(twobot) || currentrail.equals(twotop)) {
@@ -276,33 +343,35 @@ public class Lab1 {
                   onewayleft.release();
 
                 }
-                if (x == 13 && y == 10) {
+                if (x == 12 && y == 10) {
                   tsi.setSpeed(trainID, 0);
                   onewayright.acquire();
                   tsi.setSwitch(15, 9, 1);
                   tsi.setSpeed(trainID, Speed);
 
                 }
-                if (x == 13 && y == 9) {
-                  System.out.println("fuckshitaaaaaaaaaaaaaaaaaaaaaas");
-                  System.out.println(Speed);
+                if (x == 12 && y == 9) {
+
                   tsi.setSpeed(trainID, 0);
                   onewayright.acquire();
                   tsi.setSwitch(15, 9, 0);
-                  tsi.setSpeed(trainID, 0);
+                  tsi.setSpeed(trainID, Speed);
                 }
 
               }
 
               else {
-                onewayright.release();
-                if (x == 13 && y == 10 || x == 13 && y == 9) {
+
+                if (x == 12 && y == 10 || x == 12 && y == 9) {
                   onewayright.release();
+                  System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                 }
                 if (x == 6 && y == 10 || x == 6 && y == 9) {
                   tsi.setSpeed(trainID, 0);
-                  onewayright.acquire();
-                  tsi.setSwitch(4, 9, 0);
+
+                  onewayleft.acquire();
+
+                  tsi.setSwitch(4, 9, 1);
                   tsi.setSpeed(trainID, Speed);
                 }
 
@@ -313,59 +382,74 @@ public class Lab1 {
               if (this.up == true) {
 
                 if (x == 18 && y == 7) {
-                  System.out.println("jävla nördjävel2");
+
                   if (onebot.tryAcquire()) {
-                    System.out.println("jävla nördjävel");
+
                     tsi.setSwitch(17, 7, 1);
                   } else {
-                    System.out.println("jävla nördjävel3");
                     onetop.acquire();
-                    System.out.println("jävla nördjävel4");
                     tsi.setSwitch(17, 7, 0);
+                    this.top = true;
 
                   }
                 }
+                if (x == 16 && y == 9 && this.top == true) {
+                  twotop.release();
+                  System.out.println(trainID + "_" + "twotopout-1111111111111111111111111111111111111111111");
+                } else if (x == 16 && y == 9) {
+                  twobot.release();
+                }
               } else {
                 if (x == 18 && y == 7) {
-                  onetop.release();
-                  onebot.release();
-
+                  if (this.top == true) {
+                    onetop.release();
+                  } else {
+                    onebot.release();
+                  }
                 }
+
                 if (twotop.tryAcquire() && x == 18 && y == 9) {
                   tsi.setSwitch(15, 9, 1);
+                  this.top = true;
 
                 } else {
                   if (x == 18 && y == 9) {
-                    System.out.println("oi1");
                     twobot.acquire();
                     tsi.setSwitch(15, 9, 0);
-                    System.out.println("oi");
+
                   }
                 }
 
               }
             }
 
-            if ((currentrail.equals(onetop) && this.up == true) || (currentrail.equals(onebot) && this.up == true)) {
+            if ((currentrail.equals(onetop) && this.up == true) ||
+                (currentrail.equals(onebot) && this.up == true)) {
+              System.out.println("CURRENTRAILEQUALSONETOPORBOT");
 
-              if (x == 16 && y == 7 || x == 16 && y == 8) {
+              if (x == 15 && y == 7 || x == 15 && y == 8) {
                 onewayright.release();
+                System.out.println("ONEWAYRIGHT WAS REALSLED FOR OSME REASOOON");
               }
 
               if (x == 10 && y == 7 || x == 10 && y == 8) {
                 tsi.setSpeed(trainID, 0);
-                System.out.println("fick10");
+
                 intersection.acquire();
+
                 tsi.setSpeed(trainID, Speed);
               }
 
             }
 
             if (currentrail.equals(onetop) && this.up == false) {
-              System.out.println("onetop and 16");
-              if (x == 16 && y == 7) {
+
+              if (x == 15 && y == 7) {
+                tsi.setSpeed(trainID, 0);
+
                 tsi.setSpeed(trainID, 0);
                 onewayright.acquire();
+
                 tsi.setSpeed(trainID, Speed);
                 tsi.setSwitch(17, 7, 0);
               }
@@ -373,11 +457,13 @@ public class Lab1 {
             }
 
             if (currentrail.equals(onebot) && this.up == false) {
-              if (x == 16 && y == 8) {
+              if (x == 15 && y == 8) {
+                System.out.println("FUCKKKKKKKASSSSSSSSSSSSSSS!!!!!");
                 tsi.setSpeed(trainID, 0);
                 onewayright.acquire();
+                System.out.println("FUCKKKKKKKASSSSSSSSSSSSSSS1111111");
                 tsi.setSpeed(trainID, Speed);
-                tsi.setSwitch(15, 9, 1);
+                tsi.setSwitch(17, 7, 1);
               }
 
             }
@@ -397,17 +483,8 @@ public class Lab1 {
   public Lab1(int speed1, int speed2) {
     init();
     TSimInterface tsi = TSimInterface.getInstance();
-    Train train1 = new Train(1, 15, false);
-    Train train2 = new Train(2, 15, true);
-    /*
-     * for (Rail r : railsection) {
-     * for (Rail.Sensor sensor : r.sensors) {
-     * System.out.println(r.string + " " + sensor.xPos + " " + sensor.yPos);
-     * 
-     * }
-     * 
-     * }
-     */
+    Train train1 = new Train(1, 20, false, false);
+    Train train2 = new Train(2, 10, true, false);
     train1.start();
     train2.start();
 

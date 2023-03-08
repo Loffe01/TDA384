@@ -9,7 +9,7 @@
     channels
 }).
 
-
+%tom lista, intialiala state av alla processer
 initial_state(Nick, GUIAtom, ServerAtom) ->
     #client_st{
         gui = GUIAtom,
@@ -18,7 +18,7 @@ initial_state(Nick, GUIAtom, ServerAtom) ->
         channels = []
     }.
 
-
+%Tar emot request innan genserver för felhantering.
 request(Pid, Data) ->
     try genserver:request(Pid, Data) of
         Reply -> Reply
@@ -28,6 +28,8 @@ request(Pid, Data) ->
     end.
 
 
+%Skickar request till servern som 
+%skickar vidare till channel och uppdaterar channellistan
 handle(St, {join, Channel}) ->
     case request(St#client_st.server, {join, self(), St#client_st.nick, Channel}) of
         ok ->
@@ -36,7 +38,7 @@ handle(St, {join, Channel}) ->
             {reply, Error, St}
     end;
 
-
+%Skickar direkt till channel och uppdaterar clientens channellista
 handle(St, {leave, Channel}) ->
     case lists:member(Channel, St#client_st.channels) of
         false ->
@@ -47,6 +49,11 @@ handle(St, {leave, Channel}) ->
             {reply, Reply, St#client_st{channels = NewChannels}}
     end;
 
+%Skickar request till channel från guin med medelandet
+%Kollar om channel är aktiv genom active, om inte channel finns med 
+%i klientens channellista 
+%kollas om channeln aktiv, om den är aktiv så har usern
+% inte joinat annars är channeln död
 
 handle(St, {message_send, Channel, Msg}) ->
     case lists:member(Channel, St#client_st.channels) of
@@ -62,7 +69,8 @@ handle(St, {message_send, Channel, Msg}) ->
     end;
 
 
-% Remove a chosen channel from the channel list
+%ta bort ur channellistan och uppdaterar klientens channels
+% med ny lista
 handle(St, {remove_channel, Channel}) ->
     {reply, ok, St#client_st{channels = lists:delete(Channel, St#client_st.channels)}};
 % ---------------------------------------------------------------------------
