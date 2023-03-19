@@ -164,7 +164,7 @@ public class Lab1 {
               if (x == 14 && y == 3) {
                 if (this.up == false) {
                   onetop.acquire();
-                  System.out.println("ONETOP ACQUIRED IN START");
+
                   continue;
                 } else {
                   tsi.setSpeed(trainID, 0);
@@ -176,10 +176,10 @@ public class Lab1 {
                 }
               }
               if (x == 14 && y == 5) {
-                System.out.println("PASSERAT Y == 5");
+
                 if (this.up == false) {
                   onebot.acquire();
-                  System.out.println("ONEBOT ACQUIRED IN START");
+
                   continue;
                 } else {
                   tsi.setSpeed(trainID, 0);
@@ -201,7 +201,7 @@ public class Lab1 {
                   this.up = true;
                 } else {
                   railstoptop.acquire();
-                  System.out.println("railstopbot.acquired!");
+
                   continue;
                 }
               }
@@ -234,7 +234,6 @@ public class Lab1 {
                   tsi.setSpeed(trainID, Speed);
                   tsi.setSwitch(3, 11, 1);
                   railstoptop.release();
-                  System.out.println("RAILSTOP REALSED_____________________");
                   continue;
                 } else {
                   onewayleft.release();
@@ -244,9 +243,7 @@ public class Lab1 {
               if (x == 6 && y == 13) {
                 if (this.up == true) {
                   tsi.setSpeed(trainID, 0);
-                  System.out.println("KAN EJ FÅ");
                   onewayleft.acquire();
-                  System.out.println("KAN FÅ");
                   tsi.setSpeed(trainID, Speed);
                   tsi.setSwitch(3, 11, 0);
                   continue;
@@ -301,6 +298,7 @@ public class Lab1 {
 
             if (currentrail.equals(onewayleft)) {
               if (x == 1 && y == 10 && this.up == true) {
+
                 if (twobot.tryAcquire()) {
                   tsi.setSwitch(4, 9, 1);
                 } else {
@@ -318,7 +316,7 @@ public class Lab1 {
 
               if (x == 2 && this.up == false) {
                 if (railstoptop.tryAcquire()) {
-                  System.out.println("RAILSTOPBOT ACQUIRED FOR THE FIRST TIME IN FORVERER");
+
                   tsi.setSwitch(3, 11, 1);
                   this.top = true;
                 } else {
@@ -364,7 +362,7 @@ public class Lab1 {
 
                 if (x == 12 && y == 10 || x == 12 && y == 9) {
                   onewayright.release();
-                  System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
                 }
                 if (x == 6 && y == 10 || x == 6 && y == 9) {
                   tsi.setSpeed(trainID, 0);
@@ -395,7 +393,7 @@ public class Lab1 {
                 }
                 if (x == 16 && y == 9 && this.top == true) {
                   twotop.release();
-                  System.out.println(trainID + "_" + "twotopout-1111111111111111111111111111111111111111111");
+
                 } else if (x == 16 && y == 9) {
                   twobot.release();
                 }
@@ -425,11 +423,10 @@ public class Lab1 {
 
             if ((currentrail.equals(onetop) && this.up == true) ||
                 (currentrail.equals(onebot) && this.up == true)) {
-              System.out.println("CURRENTRAILEQUALSONETOPORBOT");
 
               if (x == 15 && y == 7 || x == 15 && y == 8) {
                 onewayright.release();
-                System.out.println("ONEWAYRIGHT WAS REALSLED FOR OSME REASOOON");
+
               }
 
               if (x == 10 && y == 7 || x == 10 && y == 8) {
@@ -458,10 +455,10 @@ public class Lab1 {
 
             if (currentrail.equals(onebot) && this.up == false) {
               if (x == 15 && y == 8) {
-                System.out.println("FUCKKKKKKKASSSSSSSSSSSSSSS!!!!!");
+
                 tsi.setSpeed(trainID, 0);
                 onewayright.acquire();
-                System.out.println("FUCKKKKKKKASSSSSSSSSSSSSSS1111111");
+
                 tsi.setSpeed(trainID, Speed);
                 tsi.setSwitch(17, 7, 1);
               }
